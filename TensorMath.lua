@@ -770,6 +770,16 @@ wrap("clamp",
       {name=real},
       {name=real}})
 
+wrap("snapd",
+    cname("snapd"),
+	  {{name=Tensor, default=true, returned=true, method={default='nil'}},
+      {name=Tensor, method={default=1}},
+      {name=real},
+      {name=real},
+      {name=real},
+      {name=real},
+      {name=real}})
+      
 for _,name in pairs({'lt','gt','le','ge','eq','ne'}) do
    wrap(name,
         cname(name .. 'Value'),

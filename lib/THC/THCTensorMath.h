@@ -129,6 +129,8 @@ THC_API float THCudaTensor_dist(THCState *state, THCudaTensor *self, THCudaTenso
 THC_API void THCudaTensor_rand(THCState *state, THCudaTensor *r_, THLongStorage *size);
 THC_API void THCudaTensor_randn(THCState *state, THCudaTensor *r_, THLongStorage *size);
 
+THC_API void THCudaTensor_snapd(THCState *state, THCudaTensor *r_, THCudaTensor *t, float min_t, float min_v, float max_t, float max_v, float default_v);
+
 THC_API void THCudaTensor_indexCopy(THCState *state, THCudaTensor *res_, int dim, THCudaTensor *indices, THCudaTensor *src);
 THC_API void THCudaTensor_indexAdd(THCState *state, THCudaTensor *res_, int dim, THCudaTensor *indices, THCudaTensor *src);
 THC_API void THCudaTensor_indexFill(THCState *state, THCudaTensor *tensor, int dim, THCudaTensor *index, float val);

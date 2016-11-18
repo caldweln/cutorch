@@ -660,3 +660,43 @@ void THCudaTensor_randn(THCState *state, THCudaTensor *r_, THLongStorage *size)
   THCudaTensor_resize(state, r_, size, NULL);
   THCudaTensor_normal(state, r_, 0, 1);
 }
+
+struct TensorSnapdOp {
+  TensorSnapdOp(float min_t, float min_v, float max_t, float max_v, float default_v) : min_t_Value(min_t), min_v_Value(min_v), max_t_Value(max_t), max_v_Value(max_v), default_v_Value(default_v){}
+  __device__ __forceinline__ void operator()(float* out, float* in) {
+   if (*in < min_t_Value) *out = min_v_Value;
+   else if (*in > max_t_Value) *out = max_v_Value;
+   else *out = default_v_Value;
+ }
+
+  __device__ __forceinline__ void operator()(float* out) {
+   if (*out < min_t_Value) *out = min_v_Value;
+   else if (*out > max_t_Value) *out = max_v_Value;
+   else *out = default_v_Value;
+  }
+
+ const float min_t_Value;
+ const float min_v_Value;
+ const float max_t_Value;
+ const float max_v_Value;
+ const float default_v_Value;
+};
+
+void THCudaTensor_snapd(THCState *state, THCudaTensor *self_, THCudaTensor *src, float min_t,
+  float min_v, float max_t, float max_v, float default_v)
+{
+  THAssert(THCudaTensor_checkGPU(state, 2, self_, src));
+  if (self_ == src) {
+    if (!THCudaTensor_pointwiseApply1(state, self_, TensorSnapdOp(min_t, min_v, max_t, max_v, default_v))) {
+      THArgCheck(false, 2, CUTORCH_DIM_WARNING);
+    }
+  } else {
+    THCudaTensor_resizeAs(state, self_, src);
+
+    if (!THCudaTensor_pointwiseApply2(state, self_, src, TensorSnapdOp(min_t, min_v, max_t, max_v, default_v))) {
+      THArgCheck(false, 2, CUTORCH_DIM_WARNING);
+    }
+  }
+
+  THCudaCheck(cudaGetLastError());
+}
