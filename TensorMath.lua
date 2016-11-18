@@ -779,7 +779,7 @@ wrap("snapd",
       {name=real},
       {name=real},
       {name=real}})
-      
+
 for _,name in pairs({'lt','gt','le','ge','eq','ne'}) do
    wrap(name,
         cname(name .. 'Value'),
@@ -818,6 +818,10 @@ for _,f in ipairs({{name='geometric'},
         {{name=Tensor, returned=true},
          {name=real, default=f.a}})
 end
+
+wrap("cbernoulli",
+     cname("cbernoulli"),
+     {{name=Tensor, returned=true}})
 
 for _,f in ipairs({{name='uniform', a=0, b=1},
                    {name='normal', a=0, b=1},

@@ -219,6 +219,7 @@ __global__ void NAME(curandStateMtgp32 *state, int size, float *result, ARG1, AR
 
 GENERATE_KERNEL2(generate_uniform, double a, double b, curand_uniform, x * (b-a) + a)
 GENERATE_KERNEL1(generate_bernoulli, double p, curand_uniform, (float)x <= p)
+GENERATE_KERNEL1(generate_cbernoulli, double p, curand_uniform, (float)x <= result[i])
 GENERATE_KERNEL2(generate_normal, double mean, double stdv, curand_normal, (x * stdv) + mean)
 GENERATE_KERNEL1(generate_geometric, double p, curand_uniform, (log(1-x) / log(p)) + 1)
 GENERATE_KERNEL1(generate_exponential, double lambda, curand_uniform, (float)(-1. / lambda * log(1-x)))
@@ -271,6 +272,23 @@ THC_API void THCudaTensor_bernoulli(THCState* state, THCudaTensor *self_, double
 
   generate_bernoulli<<<NUM_BLOCKS, BLOCK_SIZE, 0, THCState_getCurrentStream(state)>>>(
       state->rngState->current_gen->gen_states, size, data, p);
+
+  THCudaTensor_freeCopyTo(state, self, self_);
+};
+
+THC_API void THCudaTensor_cbernoulli(THCState* state, THCudaTensor *self_)
+{
+  THAssert(THCudaTensor_checkGPU(state, 1, self_));
+  if (state->rngState->current_gen == NULL)
+  {
+    THError("Random number generators have not been initialized.");
+  }
+  THCudaTensor *self = THCudaTensor_newContiguous(state, self_);
+  long size = THCudaTensor_nElement(state, self);
+  float *data = THCudaTensor_data(state, self);
+
+  generate_cbernoulli<<<NUM_BLOCKS, BLOCK_SIZE, 0, THCState_getCurrentStream(state)>>>(
+      state->rngState->current_gen->gen_states, size, data, 0);
 
   THCudaTensor_freeCopyTo(state, self, self_);
 };
